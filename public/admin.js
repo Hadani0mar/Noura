@@ -1,0 +1,63 @@
+'use strict';
+const cfg=window.CATALOG_CONFIG;
+const client=window.supabase.createClient(cfg.url,cfg.key);
+const statusEl=document.getElementById('status');
+let currentUser=null;
+function message(el,text,error=false){el.textContent=text;el.classList.toggle('error',error);}
+function check(result){if(result.error)throw result.error;return result.data;}
+async function showSession(){
+ document.getElementById('workspace').hidden=true;
+ document.getElementById('denied').hidden=true;
+ const {data,error}=await client.auth.getUser();
+ if(error||!data.user){currentUser=null;document.getElementById('login').hidden=false;return;}
+ currentUser=data.user;document.getElementById('login').hidden=true;
+ try{
+ const allowed=check(await client.from('catalog_admins').select('user_id').eq('user_id',currentUser.id).maybeSingle());
+ if(!allowed){document.getElementById('denied').hidden=false;return;}
+ await loadProducts();document.getElementById('workspace').hidden=false;
+ }catch(e){message(statusEl,'تعذر فتح لوحة الإدارة. حاول مرة أخرى.',true);}
+}
+async function loadProducts(){
+ const products=check(await client.from('catalog_products').select('*').order('id'));
+ const editor=document.getElementById('editor');editor.replaceChildren();
+ for(const p of products){
+ const form=document.createElement('form');form.className='edit-card';
+ form.innerHTML='<img><h2></h2><label>السعر<input name="price" type="number" min="0" max="9999999999.99" step="0.01" required></label><label>عدد العبوة<input name="pack" type="number" min="1" max="2147483647" step="1" required></label><label>صورة جديدة (PNG، JPG أو WebP — حتى 5 MB)<input name="image" type="file" accept="image/jpeg,image/png,image/webp"></label><button type="submit">حفظ التغييرات</button><p class="message" role="status" aria-live="polite"></p>';
+ const image=form.querySelector('img');image.alt=p.name;image.src=safeImage(p.image);form.querySelector('h2').textContent=p.name;form.elements.price.value=p.price;form.elements.pack.value=p.pack;
+ let preview=null;
+ form.elements.image.addEventListener('change',()=>{
+ if(preview)URL.revokeObjectURL(preview);preview=null;
+ const file=form.elements.image.files[0];if(file){preview=URL.createObjectURL(file);image.src=preview;}else image.src=safeImage(p.image);
+ });
+ form.addEventListener('submit',async event=>{
+ event.preventDefault();const msg=form.querySelector('.message');const button=form.querySelector('button');
+ const price=Number(form.elements.price.value),pack=Number(form.elements.pack.value),file=form.elements.image.files[0];
+ if(!Number.isFinite(price)||price<0||!Number.isInteger(pack)||pack<1){message(msg,'راجع السعر وعدد العبوة.',true);return;}
+ if(file&&(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5242880)){message(msg,'اختار صورة JPG أو PNG أو WebP بحجم حتى 5 MB.',true);return;}
+ button.disabled=true;message(msg,'جاري الحفظ…');let path=null;let committed=false;
+ try{
+ let newImage=p.image;
+ if(file){const ext={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}[file.type];path=p.id+'/'+crypto.randomUUID()+'.'+ext;
+ check(await client.storage.from('catalog-images').upload(path,file,{contentType:file.type,upsert:false}));
+ newImage=client.storage.from('catalog-images').getPublicUrl(path).data.publicUrl;
+ }
+ const data=check(await client.from('catalog_products').update({price,pack,image:newImage}).eq('id',p.id).eq('updated_at',p.updated_at).select().maybeSingle());
+ if(!data)throw Error('conflict');
+ committed=true;Object.assign(p,data);image.src=safeImage(p.image);form.elements.image.value='';if(preview){URL.revokeObjectURL(preview);preview=null;}
+ message(msg,'تم الحفظ. التغييرات تظهر للزوار عند فتح أو تحديث الكتالوج.');
+ }catch(e){
+ if(path&&!committed)await client.storage.from('catalog-images').remove([path]);
+ message(msg,e.message==='conflict'?'تغيّر الصنف من جلسة أخرى، أو انتهت صلاحية التعديل. حدّث الصفحة قبل المحاولة مجددًا.':'تعذر الحفظ. راجع اتصالك وتسجيل الدخول وحاول مرة أخرى.',true);
+ }finally{button.disabled=false;}
+ });editor.append(form);
+ }
+}
+function safeImage(src){try{const u=new URL(src,location.origin);return u.origin===location.origin||u.origin===cfg.url?u.href:'/assets/logo.png';}catch{return '/assets/logo.png';}}
+document.getElementById('login-form').addEventListener('submit',async e=>{
+ e.preventDefault();const f=e.currentTarget,button=f.querySelector('button');button.disabled=true;message(statusEl,'جاري تسجيل الدخول…');
+ try{check(await client.auth.signInWithPassword({email:f.elements.email.value.trim(),password:f.elements.password.value}));f.elements.password.value='';message(statusEl,'');await showSession();}catch{message(statusEl,'تعذر الدخول. راجع البريد وكلمة السر.',true);}finally{button.disabled=false;}
+});
+async function logout(){try{check(await client.auth.signOut());currentUser=null;document.getElementById('editor').replaceChildren();message(statusEl,'');await showSession();}catch{message(statusEl,'تعذر تسجيل الخروج. حاول مرة أخرى.',true);}}
+document.getElementById('logout').onclick=logout;document.getElementById('denied-logout').onclick=logout;
+client.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){document.getElementById('workspace').hidden=true;document.getElementById('editor').replaceChildren();document.getElementById('login').hidden=false;document.getElementById('denied').hidden=true;}});
+showSession();
