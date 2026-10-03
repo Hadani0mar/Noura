@@ -5,6 +5,8 @@ const client = window.supabase.createClient(cfg.url, cfg.key);
 const statusEl = document.getElementById('status');
 const addForm = document.getElementById('add-product-form');
 const addMessage = document.getElementById('add-product-message');
+const addPanel = document.getElementById('add-product-panel');
+const addOpenButton = document.getElementById('add-product-open');
 let currentUser = null;
 
 function message(el, text, error = false) {
@@ -189,6 +191,12 @@ async function loadProducts() {
   }
 }
 
+addOpenButton.addEventListener('click', () => {
+  addPanel.hidden = false;
+  addPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  requestAnimationFrame(() => addForm.elements.name.focus());
+});
+
 addForm.addEventListener('submit', async event => {
   event.preventDefault();
 
@@ -238,6 +246,7 @@ addForm.addEventListener('submit', async event => {
     addForm.reset();
     message(addMessage, 'تمت إضافة المنتج رقم ' + created.id + ' بنجاح.');
     await loadProducts();
+    addPanel.hidden = true;
   } catch {
     if (uploadedPath && !committed) {
       await client.storage.from('catalog-images').remove([uploadedPath]);
@@ -296,6 +305,7 @@ async function logout() {
     currentUser = null;
     document.getElementById('editor').replaceChildren();
     addForm.reset();
+    addPanel.hidden = true;
     message(addMessage, '');
     message(statusEl, '');
     await showSession();
