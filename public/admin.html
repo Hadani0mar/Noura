@@ -12,6 +12,10 @@
   <div><img src="/assets/logo.png" alt="الأسرة"><h1>إدارة الكتالوج</h1></div>
   <a href="/">عرض الكتالوج</a>
 </header>
+<nav id="admin-topbar" class="admin-topbar" aria-label="أدوات الإدارة" hidden>
+  <button id="add-product-open" type="button" class="add-product-top">+ إضافة منتج جديد</button>
+  <button id="logout" type="button" class="secondary">تسجيل الخروج</button>
+</nav>
 <main>
   <p id="status" role="status" aria-live="polite"></p>
 
@@ -31,10 +35,6 @@
   <section id="workspace" hidden>
     <div class="toolbar">
       <p>أضف صنف جديد أو عدّل السعر والكمية والصورة للأصناف الحالية.</p>
-      <div class="toolbar-actions">
-        <button id="add-product-open" type="button">+ إضافة منتج جديد</button>
-        <button id="logout" type="button" class="secondary">تسجيل الخروج</button>
-      </div>
     </div>
 
     <section id="add-product-panel" class="add-panel" aria-labelledby="add-product-title" hidden>

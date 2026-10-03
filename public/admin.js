@@ -7,6 +7,7 @@ const addForm = document.getElementById('add-product-form');
 const addMessage = document.getElementById('add-product-message');
 const addPanel = document.getElementById('add-product-panel');
 const addOpenButton = document.getElementById('add-product-open');
+const adminTopbar = document.getElementById('admin-topbar');
 let currentUser = null;
 
 function message(el, text, error = false) {
@@ -46,6 +47,7 @@ async function uploadImage(file, folder) {
 async function showSession() {
   document.getElementById('workspace').hidden = true;
   document.getElementById('denied').hidden = true;
+  adminTopbar.hidden = true;
 
   const { data, error } = await client.auth.getUser();
   if (error || !data.user) {
@@ -70,6 +72,7 @@ async function showSession() {
       return;
     }
 
+    adminTopbar.hidden = false;
     await loadProducts();
     document.getElementById('workspace').hidden = false;
   } catch {
@@ -320,6 +323,7 @@ document.getElementById('denied-logout').onclick = logout;
 client.auth.onAuthStateChange(event => {
   if (event === 'SIGNED_OUT') {
     document.getElementById('workspace').hidden = true;
+    adminTopbar.hidden = true;
     document.getElementById('editor').replaceChildren();
     document.getElementById('login').hidden = false;
     document.getElementById('denied').hidden = true;
