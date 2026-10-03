@@ -1,1 +1,72 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>إدارة الأسعار والصور | Noura</title><link rel="icon" href="/assets/logo.png"><link rel="stylesheet" href="/admin.css"></head><body><header><div><img src="/assets/logo.png" alt="الأسرة"><h1>إدارة الأسعار والصور</h1></div><a href="/">عرض الكتالوج</a></header><main><p id="status" role="status" aria-live="polite"></p><section id="login"><h2>تسجيل دخول الإدارة</h2><form id="login-form"><label>اسم المستخدم<input name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="50"  placeholder="نورا" required dir="ltr"></label><label>كلمة السر<input name="password" type="password" autocomplete="current-password" required minlength="8"></label><button type="submit">تسجيل الدخول</button></form></section><section id="workspace" hidden><div class="toolbar"><p>عدّل السعر أو الصورة، ثم اضغط حفظ داخل بطاقة الصنف.</p><button id="logout" type="button">تسجيل الخروج</button></div><div id="editor"></div></section><section id="denied" hidden><p>هذا الحساب ما عندهش صلاحية إدارة الكتالوج.</p><button id="denied-logout" type="button">تسجيل الخروج</button></section></main><script src="/assets/supabase-2.57.4.js" defer></script><script src="/config.js" defer></script><script src="/admin.js" defer></script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>إدارة الكتالوج | Noura</title>
+  <link rel="icon" href="/assets/logo.png">
+  <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+<header>
+  <div><img src="/assets/logo.png" alt="الأسرة"><h1>إدارة الكتالوج</h1></div>
+  <a href="/">عرض الكتالوج</a>
+</header>
+<main>
+  <p id="status" role="status" aria-live="polite"></p>
+
+  <section id="login">
+    <h2>تسجيل دخول الإدارة</h2>
+    <form id="login-form">
+      <label>اسم المستخدم
+        <input name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="50" placeholder="نورا" required dir="ltr">
+      </label>
+      <label>كلمة السر
+        <input name="password" type="password" autocomplete="current-password" required minlength="8">
+      </label>
+      <button type="submit">تسجيل الدخول</button>
+    </form>
+  </section>
+
+  <section id="workspace" hidden>
+    <div class="toolbar">
+      <p>أضف صنف جديد أو عدّل السعر والكمية والصورة للأصناف الحالية.</p>
+      <button id="logout" type="button">تسجيل الخروج</button>
+    </div>
+
+    <section class="add-panel" aria-labelledby="add-product-title">
+      <h2 id="add-product-title">إضافة منتج جديد</h2>
+      <form id="add-product-form">
+        <div class="add-grid">
+          <label class="wide">اسم المنتج
+            <input name="name" type="text" maxlength="300" required>
+          </label>
+          <label>السعر
+            <input name="price" type="number" min="0" max="9999999999.99" step="0.01" required>
+          </label>
+          <label>الكمية / عدد العبوة
+            <input name="pack" type="number" min="1" max="2147483647" step="1" required>
+          </label>
+          <label class="wide">صورة المنتج (اختياري — PNG أو JPG أو WebP حتى 5 MB)
+            <input name="image" type="file" accept="image/jpeg,image/png,image/webp">
+          </label>
+        </div>
+        <button type="submit">إضافة المنتج</button>
+        <p id="add-product-message" class="message" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <h2 class="section-title">المنتجات الحالية</h2>
+    <div id="editor"></div>
+  </section>
+
+  <section id="denied" hidden>
+    <p>هذا الحساب ما عندهش صلاحية إدارة الكتالوج.</p>
+    <button id="denied-logout" type="button">تسجيل الخروج</button>
+  </section>
+</main>
+<script src="/assets/supabase-2.57.4.js" defer></script>
+<script src="/config.js" defer></script>
+<script src="/admin.js" defer></script>
+</body>
+</html>
