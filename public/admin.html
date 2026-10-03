@@ -31,10 +31,13 @@
   <section id="workspace" hidden>
     <div class="toolbar">
       <p>أضف صنف جديد أو عدّل السعر والكمية والصورة للأصناف الحالية.</p>
-      <button id="logout" type="button">تسجيل الخروج</button>
+      <div class="toolbar-actions">
+        <button id="add-product-open" type="button">+ إضافة منتج جديد</button>
+        <button id="logout" type="button" class="secondary">تسجيل الخروج</button>
+      </div>
     </div>
 
-    <section class="add-panel" aria-labelledby="add-product-title">
+    <section id="add-product-panel" class="add-panel" aria-labelledby="add-product-title" hidden>
       <h2 id="add-product-title">إضافة منتج جديد</h2>
       <form id="add-product-form">
         <div class="add-grid">
