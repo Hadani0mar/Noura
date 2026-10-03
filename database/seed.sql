@@ -24,3 +24,9 @@ insert into public.catalog_products(id,name,pack,price,image) values
 (23,'مسحوق الأسرة كيس 1.250 ك × 10',10,142,'/assets/product-23.png'),
 (24,'مسحوق الأسرة كيس 1 ك — جودة عالية',6,128,'/assets/product-24.png'),
 (25,'مناديل الأسرة المبللة',12,38,'/assets/product-25.png');
+
+select setval(
+  pg_get_serial_sequence('public.catalog_products','id'),
+  coalesce((select max(id) from public.catalog_products), 0) + 1,
+  false
+);
