@@ -55,7 +55,7 @@ async function loadProducts(){
 function safeImage(src){try{const u=new URL(src,location.origin);return u.origin===location.origin||u.origin===cfg.url?u.href:'/assets/logo.png';}catch{return '/assets/logo.png';}}
 document.getElementById('login-form').addEventListener('submit',async e=>{
  e.preventDefault();const f=e.currentTarget,button=f.querySelector('button');button.disabled=true;message(statusEl,'جاري تسجيل الدخول…');
- try{const username=f.elements.username.value.trim().toLowerCase();if(!/^[a-z0-9][a-z0-9._-]{2,49}$/.test(username))throw Error('invalid username');check(await client.auth.signInWithPassword({email:username+'@users.noura.invalid',password:f.elements.password.value}));f.elements.password.value='';message(statusEl,'');await showSession();}catch{message(statusEl,'تعذر الدخول. راجع اسم المستخدم وكلمة السر.',true);}finally{button.disabled=false;}
+ try{const entered=f.elements.username.value.trim().normalize('NFKC').toLowerCase();const username=entered==='نورا'?'noura':entered;if(!/^[a-z0-9][a-z0-9._-]{2,49}$/.test(username))throw Error('invalid username');check(await client.auth.signInWithPassword({email:username+'@users.noura.invalid',password:f.elements.password.value}));f.elements.password.value='';message(statusEl,'');await showSession();}catch{message(statusEl,'تعذر الدخول. راجع اسم المستخدم وكلمة السر.',true);}finally{button.disabled=false;}
 });
 async function logout(){try{check(await client.auth.signOut());currentUser=null;document.getElementById('editor').replaceChildren();message(statusEl,'');await showSession();}catch{message(statusEl,'تعذر تسجيل الخروج. حاول مرة أخرى.',true);}}
 document.getElementById('logout').onclick=logout;document.getElementById('denied-logout').onclick=logout;
